@@ -1,0 +1,659 @@
+type sealed class Opencode.Client.OpencodeClient
+  ctor OpencodeClient(Opencode.Client.OpencodeClientOptions options)
+  property Opencode.Resources.App.AppClient App { get; }
+  property Opencode.Resources.Config.ConfigClient Config { get; }
+  property Opencode.Resources.Events.EventClient Event { get; }
+  property Opencode.Resources.File.FileClient File { get; }
+  property Opencode.Resources.Find.FindClient Find { get; }
+  property Opencode.Client.OpencodeClientOptions Options { get; }
+  property Opencode.Resources.Session.SessionClient Session { get; }
+  property Opencode.Resources.Tui.TuiClient Tui { get; }
+type sealed class Opencode.Client.OpencodeClientOptions
+  ctor OpencodeClientOptions()
+  property System.Uri BaseUrl { get; set; }
+  property System.Collections.Generic.IDictionary<string, string> DefaultHeaders { get; }
+  property System.Action<Opencode.Diagnostics.OpencodeDiagnosticEvent> DiagnosticsHandler { get; set; }
+  property System.Net.Http.HttpClient HttpClient { get; set; }
+  property System.Text.Json.JsonSerializerOptions JsonSerializerOptions { get; set; }
+  property int MaxRetries { get; set; }
+  property System.TimeSpan Timeout { get; set; }
+type sealed class Opencode.Diagnostics.OpencodeDiagnosticEvent
+  ctor OpencodeDiagnosticEvent()
+  property int Attempt { get; init; }
+  property System.TimeSpan Elapsed { get; init; }
+  property string ExceptionType { get; init; }
+  property Opencode.Diagnostics.OpencodeDiagnosticEventKind Kind { get; init; }
+  property System.Net.Http.HttpMethod Method { get; init; }
+  property string Path { get; init; }
+  property System.TimeSpan? RetryDelay { get; init; }
+  property System.Net.HttpStatusCode? StatusCode { get; init; }
+  property System.TimeSpan Timeout { get; init; }
+type enum Opencode.Diagnostics.OpencodeDiagnosticEventKind
+  field ExceptionThrown = 3
+  field RequestStarted = 0
+  field ResponseReceived = 1
+  field RetryScheduled = 2
+type class Opencode.Errors.ApiException
+  ctor ApiException(System.Net.HttpStatusCode statusCode, string reasonPhrase, System.Collections.Generic.IReadOnlyDictionary<string, System.Collections.Generic.IReadOnlyList<string>> headers, string responseBody, string requestId, string message, System.Exception innerException)
+  property System.Collections.Generic.IReadOnlyDictionary<string, System.Collections.Generic.IReadOnlyList<string>> Headers { get; }
+  property string ReasonPhrase { get; }
+  property string RequestId { get; }
+  property string ResponseBody { get; }
+  property System.Net.HttpStatusCode StatusCode { get; }
+type sealed class Opencode.Errors.BadRequestException
+type sealed class Opencode.Errors.ConflictException
+type class Opencode.Errors.ConnectionException
+  ctor ConnectionException(string message, System.Exception innerException)
+type sealed class Opencode.Errors.ForbiddenException
+type sealed class Opencode.Errors.InternalServerErrorException
+type sealed class Opencode.Errors.NotFoundException
+type class Opencode.Errors.OpencodeException
+  ctor OpencodeException()
+  ctor OpencodeException(string message)
+  ctor OpencodeException(string message, System.Exception innerException)
+type sealed class Opencode.Errors.RateLimitException
+type sealed class Opencode.Errors.RequestTimeoutException
+  ctor RequestTimeoutException(System.TimeSpan timeout, System.Exception innerException)
+  property System.TimeSpan Timeout { get; }
+type sealed class Opencode.Errors.UnauthorizedException
+type sealed class Opencode.Errors.UnexpectedResponseException
+  ctor UnexpectedResponseException(string message, string contentType, string responseBody, System.Exception innerException)
+  property string ContentType { get; }
+  property string ResponseBody { get; }
+type sealed class Opencode.Errors.UnprocessableEntityException
+type sealed class Opencode.Models.App.AppInfo
+  ctor AppInfo()
+  property bool Git { get; init; }
+  property string Hostname { get; init; }
+  property Opencode.Models.App.AppPathInfo Path { get; init; }
+  property Opencode.Models.App.AppTimeInfo Time { get; init; }
+type sealed class Opencode.Models.App.AppLogRequest
+  ctor AppLogRequest()
+  property System.Collections.Generic.Dictionary<string, object> Extra { get; init; }
+  property string Level { get; init; }
+  property string Message { get; init; }
+  property string Service { get; init; }
+type sealed class Opencode.Models.App.AppModeInfo
+  ctor AppModeInfo()
+  property Opencode.Models.App.AppModeModelInfo Model { get; init; }
+  property string Name { get; init; }
+  property string Prompt { get; init; }
+  property double? Temperature { get; init; }
+  property System.Collections.Generic.Dictionary<string, bool> Tools { get; init; }
+type sealed class Opencode.Models.App.AppModeModelInfo
+  ctor AppModeModelInfo()
+  property string ModelId { get; init; }
+  property string ProviderId { get; init; }
+type sealed class Opencode.Models.App.AppModelCostInfo
+  ctor AppModelCostInfo()
+  property decimal? CacheRead { get; init; }
+  property decimal? CacheWrite { get; init; }
+  property decimal Input { get; init; }
+  property decimal Output { get; init; }
+type sealed class Opencode.Models.App.AppModelInfo
+  ctor AppModelInfo()
+  property bool Attachment { get; init; }
+  property Opencode.Models.App.AppModelCostInfo Cost { get; init; }
+  property string Id { get; init; }
+  property Opencode.Models.App.AppModelLimitInfo Limit { get; init; }
+  property string Name { get; init; }
+  property System.Collections.Generic.Dictionary<string, System.Text.Json.JsonElement> Options { get; init; }
+  property bool Reasoning { get; init; }
+  property string ReleaseDate { get; init; }
+  property bool Temperature { get; init; }
+  property bool ToolCall { get; init; }
+type sealed class Opencode.Models.App.AppModelLimitInfo
+  ctor AppModelLimitInfo()
+  property int Context { get; init; }
+  property int Output { get; init; }
+type sealed class Opencode.Models.App.AppPathInfo
+  ctor AppPathInfo()
+  property string Config { get; init; }
+  property string Cwd { get; init; }
+  property string Data { get; init; }
+  property string Root { get; init; }
+  property string State { get; init; }
+type sealed class Opencode.Models.App.AppProviderInfo
+  ctor AppProviderInfo()
+  property string Api { get; init; }
+  property string[] Env { get; init; }
+  property string Id { get; init; }
+  property System.Collections.Generic.Dictionary<string, Opencode.Models.App.AppModelInfo> Models { get; init; }
+  property string Name { get; init; }
+  property string Npm { get; init; }
+type sealed class Opencode.Models.App.AppProvidersInfo
+  ctor AppProvidersInfo()
+  property System.Collections.Generic.Dictionary<string, string> Defaults { get; init; }
+  property Opencode.Models.App.AppProviderInfo[] Providers { get; init; }
+type sealed class Opencode.Models.App.AppTimeInfo
+  ctor AppTimeInfo()
+  property long? Initialized { get; init; }
+type sealed class Opencode.Models.Config.ConfigAgentDefinition
+  ctor ConfigAgentDefinition()
+  property string Description { get; init; }
+  property bool? Disable { get; init; }
+  property string Model { get; init; }
+  property string Prompt { get; init; }
+  property double? Temperature { get; init; }
+  property System.Collections.Generic.Dictionary<string, bool> Tools { get; init; }
+type sealed class Opencode.Models.Config.ConfigExperimentalInfo
+  ctor ConfigExperimentalInfo()
+  property Opencode.Models.Config.ConfigHookInfo Hook { get; init; }
+type sealed class Opencode.Models.Config.ConfigHookCommand
+  ctor ConfigHookCommand()
+  property string[] Command { get; init; }
+  property System.Collections.Generic.Dictionary<string, string> Environment { get; init; }
+type sealed class Opencode.Models.Config.ConfigHookInfo
+  ctor ConfigHookInfo()
+  property System.Collections.Generic.Dictionary<string, Opencode.Models.Config.ConfigHookCommand[]> FileEdited { get; init; }
+  property Opencode.Models.Config.ConfigHookCommand[] SessionCompleted { get; init; }
+type sealed class Opencode.Models.Config.ConfigInfo
+  ctor ConfigInfo()
+  property System.Collections.Generic.Dictionary<string, Opencode.Models.Config.ConfigAgentDefinition> Agent { get; init; }
+  property bool? Autoshare { get; init; }
+  property bool? Autoupdate { get; init; }
+  property string[] DisabledProviders { get; init; }
+  property Opencode.Models.Config.ConfigExperimentalInfo Experimental { get; init; }
+  property string[] Instructions { get; init; }
+  property System.Collections.Generic.Dictionary<string, string> Keybinds { get; init; }
+  property string Layout { get; init; }
+  property System.Collections.Generic.Dictionary<string, Opencode.Models.Config.ConfigMcpServerInfo> Mcp { get; init; }
+  property System.Collections.Generic.Dictionary<string, Opencode.Models.Config.ConfigModeDefinition> Mode { get; init; }
+  property string Model { get; init; }
+  property System.Collections.Generic.Dictionary<string, Opencode.Models.Config.ConfigProviderInfo> Provider { get; init; }
+  property string Schema { get; init; }
+  property string Share { get; init; }
+  property string SmallModel { get; init; }
+  property string Theme { get; init; }
+  property string Username { get; init; }
+type sealed class Opencode.Models.Config.ConfigMcpServerInfo
+  ctor ConfigMcpServerInfo()
+  property string[] Command { get; init; }
+  property bool? Enabled { get; init; }
+  property System.Collections.Generic.Dictionary<string, string> Environment { get; init; }
+  property System.Collections.Generic.Dictionary<string, string> Headers { get; init; }
+  property string Type { get; init; }
+  property string Url { get; init; }
+type sealed class Opencode.Models.Config.ConfigModeDefinition
+  ctor ConfigModeDefinition()
+  property bool? Disable { get; init; }
+  property string Model { get; init; }
+  property string Prompt { get; init; }
+  property double? Temperature { get; init; }
+  property System.Collections.Generic.Dictionary<string, bool> Tools { get; init; }
+type sealed class Opencode.Models.Config.ConfigProviderInfo
+  ctor ConfigProviderInfo()
+  property string Api { get; init; }
+  property string[] Env { get; init; }
+  property string Id { get; init; }
+  property System.Collections.Generic.Dictionary<string, Opencode.Models.Config.ConfigProviderModelInfo> Models { get; init; }
+  property string Name { get; init; }
+  property string Npm { get; init; }
+  property System.Collections.Generic.Dictionary<string, System.Text.Json.JsonElement> Options { get; init; }
+type sealed class Opencode.Models.Config.ConfigProviderModelCostInfo
+  ctor ConfigProviderModelCostInfo()
+  property decimal? CacheRead { get; init; }
+  property decimal? CacheWrite { get; init; }
+  property decimal Input { get; init; }
+  property decimal Output { get; init; }
+type sealed class Opencode.Models.Config.ConfigProviderModelInfo
+  ctor ConfigProviderModelInfo()
+  property bool? Attachment { get; init; }
+  property Opencode.Models.Config.ConfigProviderModelCostInfo Cost { get; init; }
+  property string Id { get; init; }
+  property Opencode.Models.Config.ConfigProviderModelLimitInfo Limit { get; init; }
+  property string Name { get; init; }
+  property System.Collections.Generic.Dictionary<string, System.Text.Json.JsonElement> Options { get; init; }
+  property bool? Reasoning { get; init; }
+  property string ReleaseDate { get; init; }
+  property bool? Temperature { get; init; }
+  property bool? ToolCall { get; init; }
+type sealed class Opencode.Models.Config.ConfigProviderModelLimitInfo
+  ctor ConfigProviderModelLimitInfo()
+  property int Context { get; init; }
+  property int Output { get; init; }
+type abstract class Opencode.Models.Events.EventStreamItem
+  property string EventType { get; }
+type sealed class Opencode.Models.Events.FileEditedEvent
+  ctor FileEditedEvent()
+  property string EventType { get; }
+  property Opencode.Models.Events.FileEditedEventProperties Properties { get; init; }
+type sealed class Opencode.Models.Events.FileEditedEventProperties
+  ctor FileEditedEventProperties()
+  property string File { get; init; }
+type sealed class Opencode.Models.Events.FileWatcherUpdatedEvent
+  ctor FileWatcherUpdatedEvent()
+  property string EventType { get; }
+  property Opencode.Models.Events.FileWatcherUpdatedEventProperties Properties { get; init; }
+type sealed class Opencode.Models.Events.FileWatcherUpdatedEventProperties
+  ctor FileWatcherUpdatedEventProperties()
+  property string Event { get; init; }
+  property string File { get; init; }
+type sealed class Opencode.Models.Events.IdeInstalledEvent
+  ctor IdeInstalledEvent()
+  property string EventType { get; }
+  property Opencode.Models.Events.IdeInstalledEventProperties Properties { get; init; }
+type sealed class Opencode.Models.Events.IdeInstalledEventProperties
+  ctor IdeInstalledEventProperties()
+  property string Ide { get; init; }
+type sealed class Opencode.Models.Events.InstallationUpdatedEvent
+  ctor InstallationUpdatedEvent()
+  property string EventType { get; }
+  property Opencode.Models.Events.InstallationUpdatedEventProperties Properties { get; init; }
+type sealed class Opencode.Models.Events.InstallationUpdatedEventProperties
+  ctor InstallationUpdatedEventProperties()
+  property string Version { get; init; }
+type sealed class Opencode.Models.Events.LspClientDiagnosticsEvent
+  ctor LspClientDiagnosticsEvent()
+  property string EventType { get; }
+  property Opencode.Models.Events.LspClientDiagnosticsEventProperties Properties { get; init; }
+type sealed class Opencode.Models.Events.LspClientDiagnosticsEventProperties
+  ctor LspClientDiagnosticsEventProperties()
+  property string Path { get; init; }
+  property string ServerId { get; init; }
+type sealed class Opencode.Models.Events.MessagePartRemovedEvent
+  ctor MessagePartRemovedEvent()
+  property string EventType { get; }
+  property Opencode.Models.Events.MessagePartRemovedEventProperties Properties { get; init; }
+type sealed class Opencode.Models.Events.MessagePartRemovedEventProperties
+  ctor MessagePartRemovedEventProperties()
+  property string MessageId { get; init; }
+  property string PartId { get; init; }
+type sealed class Opencode.Models.Events.MessagePartUpdatedEvent
+  ctor MessagePartUpdatedEvent()
+  property string EventType { get; }
+  property Opencode.Models.Events.MessagePartUpdatedEventProperties Properties { get; init; }
+type sealed class Opencode.Models.Events.MessagePartUpdatedEventProperties
+  ctor MessagePartUpdatedEventProperties()
+  property Opencode.Models.Session.MessagePart Part { get; init; }
+type sealed class Opencode.Models.Events.MessageRemovedEvent
+  ctor MessageRemovedEvent()
+  property string EventType { get; }
+  property Opencode.Models.Events.MessageRemovedEventProperties Properties { get; init; }
+type sealed class Opencode.Models.Events.MessageRemovedEventProperties
+  ctor MessageRemovedEventProperties()
+  property string MessageId { get; init; }
+  property string SessionId { get; init; }
+type sealed class Opencode.Models.Events.MessageUpdatedEvent
+  ctor MessageUpdatedEvent()
+  property string EventType { get; }
+  property Opencode.Models.Events.MessageUpdatedEventProperties Properties { get; init; }
+type sealed class Opencode.Models.Events.MessageUpdatedEventProperties
+  ctor MessageUpdatedEventProperties()
+  property Opencode.Models.Session.SessionMessage Info { get; init; }
+type sealed class Opencode.Models.Events.PermissionUpdatedEvent
+  ctor PermissionUpdatedEvent()
+  property string EventType { get; }
+  property Opencode.Models.Events.PermissionUpdatedEventProperties Properties { get; init; }
+type sealed class Opencode.Models.Events.PermissionUpdatedEventProperties
+  ctor PermissionUpdatedEventProperties()
+  property string Id { get; init; }
+  property System.Collections.Generic.IReadOnlyDictionary<string, System.Text.Json.JsonElement> Metadata { get; init; }
+  property string SessionId { get; init; }
+  property Opencode.Models.Events.PermissionUpdatedEventTimeInfo Time { get; init; }
+  property string Title { get; init; }
+type sealed class Opencode.Models.Events.PermissionUpdatedEventTimeInfo
+  ctor PermissionUpdatedEventTimeInfo()
+  property long Created { get; init; }
+type sealed class Opencode.Models.Events.SessionDeletedEvent
+  ctor SessionDeletedEvent()
+  property string EventType { get; }
+  property Opencode.Models.Events.SessionDeletedEventProperties Properties { get; init; }
+type sealed class Opencode.Models.Events.SessionDeletedEventProperties
+  ctor SessionDeletedEventProperties()
+  property Opencode.Models.Session.SessionInfo Info { get; init; }
+type sealed class Opencode.Models.Events.SessionErrorEvent
+  ctor SessionErrorEvent()
+  property string EventType { get; }
+  property Opencode.Models.Events.SessionErrorEventProperties Properties { get; init; }
+type sealed class Opencode.Models.Events.SessionErrorEventProperties
+  ctor SessionErrorEventProperties()
+  property Opencode.Models.Session.AssistantMessageError Error { get; init; }
+  property string SessionId { get; init; }
+type sealed class Opencode.Models.Events.SessionIdleEvent
+  ctor SessionIdleEvent()
+  property string EventType { get; }
+  property Opencode.Models.Events.SessionIdleEventProperties Properties { get; init; }
+type sealed class Opencode.Models.Events.SessionIdleEventProperties
+  ctor SessionIdleEventProperties()
+  property string SessionId { get; init; }
+type sealed class Opencode.Models.Events.SessionUpdatedEvent
+  ctor SessionUpdatedEvent()
+  property string EventType { get; }
+  property Opencode.Models.Events.SessionUpdatedEventProperties Properties { get; init; }
+type sealed class Opencode.Models.Events.SessionUpdatedEventProperties
+  ctor SessionUpdatedEventProperties()
+  property Opencode.Models.Session.SessionInfo Info { get; init; }
+type sealed class Opencode.Models.Events.StorageWriteEvent
+  ctor StorageWriteEvent()
+  property string EventType { get; }
+  property Opencode.Models.Events.StorageWriteEventProperties Properties { get; init; }
+type sealed class Opencode.Models.Events.StorageWriteEventProperties
+  ctor StorageWriteEventProperties()
+  property System.Text.Json.JsonElement? Content { get; init; }
+  property string Key { get; init; }
+type sealed class Opencode.Models.File.FileReadResponse
+  ctor FileReadResponse()
+  property string Content { get; init; }
+  property string Type { get; init; }
+type sealed class Opencode.Models.File.FileStatusEntry
+  ctor FileStatusEntry()
+  property int Added { get; init; }
+  property string Path { get; init; }
+  property int Removed { get; init; }
+  property string Status { get; init; }
+type sealed class Opencode.Models.Find.FindPosition
+  ctor FindPosition()
+  property int Character { get; init; }
+  property int Line { get; init; }
+type sealed class Opencode.Models.Find.FindRange
+  ctor FindRange()
+  property Opencode.Models.Find.FindPosition End { get; init; }
+  property Opencode.Models.Find.FindPosition Start { get; init; }
+type sealed class Opencode.Models.Find.FindSymbol
+  ctor FindSymbol()
+  property int Kind { get; init; }
+  property Opencode.Models.Find.FindSymbolLocation Location { get; init; }
+  property string Name { get; init; }
+type sealed class Opencode.Models.Find.FindSymbolLocation
+  ctor FindSymbolLocation()
+  property Opencode.Models.Find.FindRange Range { get; init; }
+  property string Uri { get; init; }
+type sealed class Opencode.Models.Find.FindTextMatch
+  ctor FindTextMatch()
+  property int AbsoluteOffset { get; init; }
+  property int LineNumber { get; init; }
+  property Opencode.Models.Find.FindTextValue Lines { get; init; }
+  property Opencode.Models.Find.FindTextValue Path { get; init; }
+  property Opencode.Models.Find.FindTextSubmatch[] Submatches { get; init; }
+type sealed class Opencode.Models.Find.FindTextSubmatch
+  ctor FindTextSubmatch()
+  property int End { get; init; }
+  property Opencode.Models.Find.FindTextValue Match { get; init; }
+  property int Start { get; init; }
+type sealed class Opencode.Models.Find.FindTextValue
+  ctor FindTextValue()
+  property string Text { get; init; }
+type sealed class Opencode.Models.Session.AssistantMessage
+  ctor AssistantMessage()
+  property string Agent { get; init; }
+  property double Cost { get; init; }
+  property Opencode.Models.Session.AssistantMessageError Error { get; init; }
+  property string Finish { get; init; }
+  property string MessageRole { get; }
+  property string Mode { get; init; }
+  property string ModelId { get; init; }
+  property string ParentId { get; init; }
+  property Opencode.Models.Session.AssistantMessagePathInfo Path { get; init; }
+  property string ProviderId { get; init; }
+  property bool? Summary { get; init; }
+  property System.Collections.Generic.IReadOnlyList<string> System { get; init; }
+  property Opencode.Models.Session.AssistantMessageTimeInfo Time { get; init; }
+  property Opencode.Models.Session.AssistantMessageTokensInfo Tokens { get; init; }
+type abstract class Opencode.Models.Session.AssistantMessageError
+  property string ErrorName { get; }
+type sealed class Opencode.Models.Session.AssistantMessagePathInfo
+  ctor AssistantMessagePathInfo()
+  property string Cwd { get; init; }
+  property string Root { get; init; }
+type sealed class Opencode.Models.Session.AssistantMessageTimeInfo
+  ctor AssistantMessageTimeInfo()
+  property long? Completed { get; init; }
+  property long Created { get; init; }
+type sealed class Opencode.Models.Session.AssistantMessageTokensInfo
+  ctor AssistantMessageTokensInfo()
+  property Opencode.Models.Session.MessageCacheTokensInfo Cache { get; init; }
+  property int Input { get; init; }
+  property int Output { get; init; }
+  property int Reasoning { get; init; }
+  property int? Total { get; init; }
+type sealed class Opencode.Models.Session.FilePart
+  ctor FilePart()
+  property string Filename { get; init; }
+  property string Mime { get; init; }
+  property string PartType { get; }
+  property Opencode.Models.Session.FilePartSource Source { get; init; }
+  property string Url { get; init; }
+type sealed class Opencode.Models.Session.FilePartInput
+  ctor FilePartInput()
+  property string Filename { get; init; }
+  property string InputType { get; }
+  property string Mime { get; init; }
+  property Opencode.Models.Session.FilePartSource Source { get; init; }
+  property string Url { get; init; }
+type abstract class Opencode.Models.Session.FilePartSource
+  property string SourceType { get; }
+type sealed class Opencode.Models.Session.FilePartSourceText
+  ctor FilePartSourceText()
+  property int End { get; init; }
+  property int Start { get; init; }
+  property string Value { get; init; }
+type sealed class Opencode.Models.Session.FileSource
+  ctor FileSource()
+  property string Path { get; init; }
+  property string SourceType { get; }
+  property Opencode.Models.Session.FilePartSourceText Text { get; init; }
+type sealed class Opencode.Models.Session.MessageAbortedError
+  ctor MessageAbortedError()
+  property System.Text.Json.JsonElement Data { get; init; }
+  property string ErrorName { get; }
+type sealed class Opencode.Models.Session.MessageCacheTokensInfo
+  ctor MessageCacheTokensInfo()
+  property int Read { get; init; }
+  property int Write { get; init; }
+type sealed class Opencode.Models.Session.MessageOutputLengthError
+  ctor MessageOutputLengthError()
+  property System.Text.Json.JsonElement Data { get; init; }
+  property string ErrorName { get; }
+type abstract class Opencode.Models.Session.MessagePart
+  property string Id { get; init; }
+  property string MessageId { get; init; }
+  property string PartType { get; }
+  property string SessionId { get; init; }
+type sealed class Opencode.Models.Session.PatchPart
+  ctor PatchPart()
+  property System.Collections.Generic.IReadOnlyList<string> Files { get; init; }
+  property string Hash { get; init; }
+  property string PartType { get; }
+type sealed class Opencode.Models.Session.ProviderAuthError
+  ctor ProviderAuthError()
+  property Opencode.Models.Session.ProviderAuthErrorData Data { get; init; }
+  property string ErrorName { get; }
+type sealed class Opencode.Models.Session.ProviderAuthErrorData
+  ctor ProviderAuthErrorData()
+  property string Message { get; init; }
+  property string ProviderId { get; init; }
+type sealed class Opencode.Models.Session.ReasoningPart
+  ctor ReasoningPart()
+  property System.Collections.Generic.IReadOnlyDictionary<string, System.Text.Json.JsonElement> Metadata { get; init; }
+  property string PartType { get; }
+  property string Text { get; init; }
+  property Opencode.Models.Session.TextPartTimeInfo Time { get; init; }
+type sealed class Opencode.Models.Session.SessionChatRequest
+  ctor SessionChatRequest()
+  property string MessageId { get; init; }
+  property string Mode { get; init; }
+  property string ModelId { get; init; }
+  property System.Collections.Generic.IReadOnlyList<Opencode.Models.Session.SessionMessagePartInput> Parts { get; init; }
+  property string ProviderId { get; init; }
+  property string System { get; init; }
+  property System.Collections.Generic.IReadOnlyDictionary<string, bool> Tools { get; init; }
+type sealed class Opencode.Models.Session.SessionInfo
+  ctor SessionInfo()
+  property string Id { get; init; }
+  property string ParentId { get; init; }
+  property Opencode.Models.Session.SessionRevertInfo Revert { get; init; }
+  property Opencode.Models.Session.SessionShareInfo Share { get; init; }
+  property Opencode.Models.Session.SessionTimeInfo Time { get; init; }
+  property string Title { get; init; }
+  property string Version { get; init; }
+type sealed class Opencode.Models.Session.SessionInitRequest
+  ctor SessionInitRequest()
+  property string MessageId { get; init; }
+  property string ModelId { get; init; }
+  property string ProviderId { get; init; }
+type abstract class Opencode.Models.Session.SessionMessage
+  property string Id { get; init; }
+  property string MessageRole { get; }
+  property string SessionId { get; init; }
+type sealed class Opencode.Models.Session.SessionMessageEntry
+  ctor SessionMessageEntry()
+  property Opencode.Models.Session.SessionMessage Info { get; init; }
+  property System.Collections.Generic.IReadOnlyList<Opencode.Models.Session.MessagePart> Parts { get; init; }
+type abstract class Opencode.Models.Session.SessionMessagePartInput
+  property string Id { get; init; }
+  property string InputType { get; }
+type sealed class Opencode.Models.Session.SessionRevertInfo
+  ctor SessionRevertInfo()
+  property string Diff { get; init; }
+  property string MessageId { get; init; }
+  property string PartId { get; init; }
+  property string Snapshot { get; init; }
+type sealed class Opencode.Models.Session.SessionRevertRequest
+  ctor SessionRevertRequest()
+  property string MessageId { get; init; }
+  property string PartId { get; init; }
+type sealed class Opencode.Models.Session.SessionShareInfo
+  ctor SessionShareInfo()
+  property string Url { get; init; }
+type sealed class Opencode.Models.Session.SessionSummarizeRequest
+  ctor SessionSummarizeRequest()
+  property string ModelId { get; init; }
+  property string ProviderId { get; init; }
+type sealed class Opencode.Models.Session.SessionTimeInfo
+  ctor SessionTimeInfo()
+  property long Created { get; init; }
+  property long Updated { get; init; }
+type sealed class Opencode.Models.Session.SnapshotPart
+  ctor SnapshotPart()
+  property string PartType { get; }
+  property string Snapshot { get; init; }
+type sealed class Opencode.Models.Session.StepFinishPart
+  ctor StepFinishPart()
+  property double Cost { get; init; }
+  property string PartType { get; }
+  property string Reason { get; init; }
+  property Opencode.Models.Session.AssistantMessageTokensInfo Tokens { get; init; }
+type sealed class Opencode.Models.Session.StepStartPart
+  ctor StepStartPart()
+  property string PartType { get; }
+type sealed class Opencode.Models.Session.SymbolSource
+  ctor SymbolSource()
+  property int Kind { get; init; }
+  property string Name { get; init; }
+  property string Path { get; init; }
+  property Opencode.Models.Session.SymbolSourceRangeInfo Range { get; init; }
+  property string SourceType { get; }
+  property Opencode.Models.Session.FilePartSourceText Text { get; init; }
+type sealed class Opencode.Models.Session.SymbolSourcePositionInfo
+  ctor SymbolSourcePositionInfo()
+  property int Character { get; init; }
+  property int Line { get; init; }
+type sealed class Opencode.Models.Session.SymbolSourceRangeInfo
+  ctor SymbolSourceRangeInfo()
+  property Opencode.Models.Session.SymbolSourcePositionInfo End { get; init; }
+  property Opencode.Models.Session.SymbolSourcePositionInfo Start { get; init; }
+type sealed class Opencode.Models.Session.TextPart
+  ctor TextPart()
+  property string PartType { get; }
+  property bool? Synthetic { get; init; }
+  property string Text { get; init; }
+  property Opencode.Models.Session.TextPartTimeInfo Time { get; init; }
+type sealed class Opencode.Models.Session.TextPartInput
+  ctor TextPartInput()
+  property string InputType { get; }
+  property bool? Synthetic { get; init; }
+  property string Text { get; init; }
+  property Opencode.Models.Session.TextPartTimeInfo Time { get; init; }
+type sealed class Opencode.Models.Session.TextPartTimeInfo
+  ctor TextPartTimeInfo()
+  property long? End { get; init; }
+  property long Start { get; init; }
+type sealed class Opencode.Models.Session.ToolPart
+  ctor ToolPart()
+  property string CallId { get; init; }
+  property string PartType { get; }
+  property Opencode.Models.Session.ToolState State { get; init; }
+  property string Tool { get; init; }
+type abstract class Opencode.Models.Session.ToolState
+  property string ToolStatus { get; }
+type sealed class Opencode.Models.Session.ToolStateCompleted
+  ctor ToolStateCompleted()
+  property System.Collections.Generic.IReadOnlyDictionary<string, System.Text.Json.JsonElement> Input { get; init; }
+  property System.Collections.Generic.IReadOnlyDictionary<string, System.Text.Json.JsonElement> Metadata { get; init; }
+  property string Output { get; init; }
+  property Opencode.Models.Session.ToolStateCompletedTimeInfo Time { get; init; }
+  property string Title { get; init; }
+  property string ToolStatus { get; }
+type sealed class Opencode.Models.Session.ToolStateCompletedTimeInfo
+  ctor ToolStateCompletedTimeInfo()
+  property long End { get; init; }
+  property long Start { get; init; }
+type sealed class Opencode.Models.Session.ToolStateError
+  ctor ToolStateError()
+  property string Error { get; init; }
+  property System.Collections.Generic.IReadOnlyDictionary<string, System.Text.Json.JsonElement> Input { get; init; }
+  property Opencode.Models.Session.ToolStateCompletedTimeInfo Time { get; init; }
+  property string ToolStatus { get; }
+type sealed class Opencode.Models.Session.ToolStatePending
+  ctor ToolStatePending()
+  property string ToolStatus { get; }
+type sealed class Opencode.Models.Session.ToolStateRunning
+  ctor ToolStateRunning()
+  property System.Text.Json.JsonElement? Input { get; init; }
+  property System.Collections.Generic.IReadOnlyDictionary<string, System.Text.Json.JsonElement> Metadata { get; init; }
+  property Opencode.Models.Session.ToolStateRunningTimeInfo Time { get; init; }
+  property string Title { get; init; }
+  property string ToolStatus { get; }
+type sealed class Opencode.Models.Session.ToolStateRunningTimeInfo
+  ctor ToolStateRunningTimeInfo()
+  property long Start { get; init; }
+type sealed class Opencode.Models.Session.UnknownError
+  ctor UnknownError()
+  property Opencode.Models.Session.UnknownErrorData Data { get; init; }
+  property string ErrorName { get; }
+type sealed class Opencode.Models.Session.UnknownErrorData
+  ctor UnknownErrorData()
+  property string Message { get; init; }
+type sealed class Opencode.Models.Session.UserMessage
+  ctor UserMessage()
+  property string MessageRole { get; }
+  property Opencode.Models.Session.UserMessageTimeInfo Time { get; init; }
+type sealed class Opencode.Models.Session.UserMessageTimeInfo
+  ctor UserMessageTimeInfo()
+  property long Created { get; init; }
+type sealed class Opencode.Resources.App.AppClient
+  method System.Threading.Tasks.Task<Opencode.Models.App.AppInfo> GetAsync(System.Threading.CancellationToken cancellationToken)
+  method System.Threading.Tasks.Task<Opencode.Models.App.AppModeInfo[]> GetModesAsync(System.Threading.CancellationToken cancellationToken)
+  method System.Threading.Tasks.Task<Opencode.Models.App.AppProvidersInfo> GetProvidersAsync(System.Threading.CancellationToken cancellationToken)
+  method System.Threading.Tasks.Task<bool> InitializeAsync(System.Threading.CancellationToken cancellationToken)
+  method System.Threading.Tasks.Task<bool> LogAsync(Opencode.Models.App.AppLogRequest request, System.Threading.CancellationToken cancellationToken)
+type sealed class Opencode.Resources.Config.ConfigClient
+  method System.Threading.Tasks.Task<Opencode.Models.Config.ConfigInfo> GetAsync(System.Threading.CancellationToken cancellationToken)
+type sealed class Opencode.Resources.Events.EventClient
+  method System.Collections.Generic.IAsyncEnumerable<Opencode.Models.Events.EventStreamItem> ListAsync(System.Threading.CancellationToken cancellationToken)
+type sealed class Opencode.Resources.File.FileClient
+  method System.Threading.Tasks.Task<Opencode.Models.File.FileReadResponse> ReadAsync(string path, System.Threading.CancellationToken cancellationToken)
+  method System.Threading.Tasks.Task<Opencode.Models.File.FileStatusEntry[]> GetStatusAsync(System.Threading.CancellationToken cancellationToken)
+type sealed class Opencode.Resources.Find.FindClient
+  method System.Threading.Tasks.Task<Opencode.Models.Find.FindSymbol[]> FindSymbolsAsync(string query, System.Threading.CancellationToken cancellationToken)
+  method System.Threading.Tasks.Task<Opencode.Models.Find.FindTextMatch[]> FindTextAsync(string pattern, System.Threading.CancellationToken cancellationToken)
+  method System.Threading.Tasks.Task<string[]> FindFilesAsync(string query, System.Threading.CancellationToken cancellationToken)
+type sealed class Opencode.Resources.Session.SessionClient
+  method System.Threading.Tasks.Task<Opencode.Models.Session.AssistantMessage> ChatAsync(string sessionId, Opencode.Models.Session.SessionChatRequest request, System.Threading.CancellationToken cancellationToken)
+  method System.Threading.Tasks.Task<Opencode.Models.Session.SessionInfo> CreateAsync(System.Threading.CancellationToken cancellationToken)
+  method System.Threading.Tasks.Task<Opencode.Models.Session.SessionInfo> RevertAsync(string sessionId, Opencode.Models.Session.SessionRevertRequest request, System.Threading.CancellationToken cancellationToken)
+  method System.Threading.Tasks.Task<Opencode.Models.Session.SessionInfo> ShareAsync(string sessionId, System.Threading.CancellationToken cancellationToken)
+  method System.Threading.Tasks.Task<Opencode.Models.Session.SessionInfo> UnrevertAsync(string sessionId, System.Threading.CancellationToken cancellationToken)
+  method System.Threading.Tasks.Task<Opencode.Models.Session.SessionInfo> UnshareAsync(string sessionId, System.Threading.CancellationToken cancellationToken)
+  method System.Threading.Tasks.Task<Opencode.Models.Session.SessionInfo[]> ListAsync(System.Threading.CancellationToken cancellationToken)
+  method System.Threading.Tasks.Task<Opencode.Models.Session.SessionMessageEntry[]> MessagesAsync(string sessionId, System.Threading.CancellationToken cancellationToken)
+  method System.Threading.Tasks.Task<bool> AbortAsync(string sessionId, System.Threading.CancellationToken cancellationToken)
+  method System.Threading.Tasks.Task<bool> DeleteAsync(string sessionId, System.Threading.CancellationToken cancellationToken)
+  method System.Threading.Tasks.Task<bool> InitAsync(string sessionId, Opencode.Models.Session.SessionInitRequest request, System.Threading.CancellationToken cancellationToken)
+  method System.Threading.Tasks.Task<bool> SummarizeAsync(string sessionId, Opencode.Models.Session.SessionSummarizeRequest request, System.Threading.CancellationToken cancellationToken)
+type sealed class Opencode.Resources.Tui.TuiClient
+  method System.Threading.Tasks.Task<bool> AppendPromptAsync(string text, System.Threading.CancellationToken cancellationToken)
+  method System.Threading.Tasks.Task<bool> OpenHelpAsync(System.Threading.CancellationToken cancellationToken)
+type sealed class Opencode.SdkAssemblyMarker
+  ctor SdkAssemblyMarker()
