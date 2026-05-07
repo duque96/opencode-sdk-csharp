@@ -1,0 +1,17 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/samples/">
+    <Project Path="samples/Opencode.Sdk.MinimalSample/Opencode.Sdk.MinimalSample.csproj" />
+    <Project Path="samples/Opencode.Sdk.Samples/Opencode.Sdk.Samples.csproj" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/Opencode.Sdk/Opencode.Sdk.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Opencode.Sdk.Tests/Opencode.Sdk.Tests.csproj" />
+  </Folder>
+</Solution>

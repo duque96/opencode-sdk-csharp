@@ -1,0 +1,8 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageId>Opencode.Sdk</PackageId>
+    <RootNamespace>Opencode</RootNamespace>
+  </PropertyGroup>
+
+</Project>
