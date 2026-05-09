@@ -19,4 +19,4 @@ Please allow reasonable time for investigation, remediation, and coordinated dis
 
 ## Scope
 
-This policy applies to the code in this repository and its published NuGet package. Issues in Opencode services or infrastructure outside this repository should be reported to the appropriate upstream maintainers.
+This policy applies to the code in this repository and its published GitHub Packages package. Issues in Opencode services or infrastructure outside this repository should be reported to the appropriate upstream maintainers.

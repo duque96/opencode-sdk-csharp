@@ -50,16 +50,16 @@ Pull requests should include:
 - The validation command(s) you ran
 - Relevant documentation or sample updates when consumer behavior changes
 
-Commit messages should follow the Conventional Commits format so the automated release flow can infer semantic version bumps:
-
-- `fix:` for patch releases
-- `feat:` for minor releases
-- `feat!:` or any `type!:` for major releases
-
 ## Releases
 
-Versioning and changelog updates are managed by release-please via [.github/workflows/release-please.yml](.github/workflows/release-please.yml), [release-please-config.json](release-please-config.json), and [.release-please-manifest.json](.release-please-manifest.json).
+Versioning is managed manually in [Directory.Build.props](Directory.Build.props). Update the `<Version>` value before publishing a new package.
 
-NuGet publication reuses the same verification gate in CI and runs automatically from the release-please workflow whenever a GitHub release is created. The workflow requires the `NUGET_API_KEY` repository secret.
+Before publishing, run:
 
-The manual fallback workflow in [.github/workflows/publish-nuget.yml](.github/workflows/publish-nuget.yml) can be used to republish an already tagged version if the automated publication step fails.
+```bash
+bash eng/verify-release.sh Release
+```
+
+Publication runs automatically through [.github/workflows/publish-github-packages.yml](.github/workflows/publish-github-packages.yml) only when a pull request is merged into `main` and that merge changes the `<Version>` value in [Directory.Build.props](Directory.Build.props). The workflow can also be launched manually from GitHub Actions when needed, for example to retry a failed publish. It publishes the generated package to both GitHub Packages and nuget.org. GitHub Packages uses the repository `GITHUB_TOKEN`, and nuget.org requires the `NUGET_API_KEY` repository secret.
+
+If you keep a release history, update [CHANGELOG.md](CHANGELOG.md) manually as part of the version bump.

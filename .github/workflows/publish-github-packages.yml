@@ -1,0 +1,117 @@
+name: Publish Packages
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - closed
+    paths:
+      - Directory.Build.props
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.merge_commit_sha || github.sha }}
+
+      - name: Detect version change
+        id: version_change
+        if: ${{ github.event_name == 'pull_request' }}
+        shell: bash
+        run: |
+          before_line="$(git show "${{ github.event.pull_request.base.sha }}:Directory.Build.props" | grep -m1 '<Version>' || true)"
+          after_line="$(git show "${{ github.event.pull_request.merge_commit_sha }}:Directory.Build.props" | grep -m1 '<Version>' || true)"
+
+          if [[ -z "${before_line}" || -z "${after_line}" ]]; then
+            echo "Unable to resolve version lines from Directory.Build.props." >&2
+            exit 1
+          fi
+
+          if [[ "${before_line}" == "${after_line}" ]]; then
+            echo "changed=false" >> "${GITHUB_OUTPUT}"
+            echo "Version did not change; skipping package publication."
+          else
+            echo "changed=true" >> "${GITHUB_OUTPUT}"
+            echo "Version changed from ${before_line} to ${after_line}."
+          fi
+
+      - name: Setup .NET SDK
+        if: ${{ github.event_name == 'workflow_dispatch' || steps.version_change.outputs.changed == 'true' }}
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Verify release readiness
+        if: ${{ github.event_name == 'workflow_dispatch' || steps.version_change.outputs.changed == 'true' }}
+        run: bash eng/verify-release.sh Release
+
+      - name: Configure GitHub Packages source
+        if: ${{ github.event_name == 'workflow_dispatch' || steps.version_change.outputs.changed == 'true' }}
+        shell: bash
+        env:
+          GITHUB_OWNER: ${{ github.repository_owner }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          dotnet nuget remove source github-packages >/dev/null 2>&1 || true
+
+          dotnet nuget add source "https://nuget.pkg.github.com/${GITHUB_OWNER}/index.json" \
+            --name github-packages \
+            --username "${GITHUB_OWNER}" \
+            --password "${GITHUB_TOKEN}" \
+            --store-password-in-clear-text
+
+      - name: Publish package to GitHub Packages
+        if: ${{ github.event_name == 'workflow_dispatch' || steps.version_change.outputs.changed == 'true' }}
+        shell: bash
+        run: |
+          mapfile -t packages < <(find artifacts/package/release -maxdepth 1 -type f -name 'Opencode.Sdk.*.nupkg' ! -name '*.snupkg' | sort)
+
+          if [[ "${#packages[@]}" -eq 0 ]]; then
+            echo "No packages found under artifacts/package/release." >&2
+            exit 1
+          fi
+
+          dotnet nuget push "${packages[@]}" \
+            --source github-packages \
+            --skip-duplicate
+
+      - name: Validate NuGet API key
+        if: ${{ github.event_name == 'workflow_dispatch' || steps.version_change.outputs.changed == 'true' }}
+        shell: bash
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: |
+          if [[ -z "${NUGET_API_KEY}" ]]; then
+            echo "NUGET_API_KEY repository secret is required to publish to nuget.org." >&2
+            exit 1
+          fi
+
+      - name: Publish package to NuGet
+        if: ${{ github.event_name == 'workflow_dispatch' || steps.version_change.outputs.changed == 'true' }}
+        shell: bash
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: |
+          mapfile -t packages < <(find artifacts/package/release -maxdepth 1 -type f -name 'Opencode.Sdk.*.nupkg' ! -name '*.snupkg' | sort)
+
+          if [[ "${#packages[@]}" -eq 0 ]]; then
+            echo "No packages found under artifacts/package/release." >&2
+            exit 1
+          fi
+
+          dotnet nuget push "${packages[@]}" \
+            --api-key "${NUGET_API_KEY}" \
+            --source https://api.nuget.org/v3/index.json \
+            --skip-duplicate
