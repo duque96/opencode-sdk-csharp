@@ -48,6 +48,7 @@ await foreach (var item in client.Event.ListAsync(cancellationTokenSource.Token)
 | `lsp.client.diagnostics` | `LspClientDiagnosticsEvent` | Diagnostics refresh for one file. Exposes `Properties.Path` and `Properties.ServerId`. |
 | `message.updated` | `MessageUpdatedEvent` | Session message metadata update. Exposes `Properties.Info` as a polymorphic `SessionMessage`. |
 | `message.removed` | `MessageRemovedEvent` | Message removal notification. Exposes `Properties.MessageId` and `Properties.SessionId`. |
+| `message.part.delta` | `MessagePartDeltaEvent` | Incremental text delta for a streamed message part. Exposes `Properties.SessionId`, `Properties.MessageId`, `Properties.PartId`, `Properties.Field`, and `Properties.Delta`. |
 | `message.part.updated` | `MessagePartUpdatedEvent` | Incremental update to one message part. Exposes `Properties.Part` as a polymorphic `MessagePart`. |
 | `message.part.removed` | `MessagePartRemovedEvent` | Message part removal notification. Exposes `Properties.MessageId` and `Properties.PartId`. |
 | `storage.write` | `StorageWriteEvent` | Storage write notification. Exposes `Properties.Key` and optional `Properties.Content`. |
@@ -66,6 +67,7 @@ await foreach (var item in client.Event.ListAsync(cancellationTokenSource.Token)
 Some event payloads reference other public polymorphic models rather than plain scalar data:
 
 - `MessageUpdatedEvent.Properties.Info` can be `UserMessage` or `AssistantMessage`.
+- `MessagePartDeltaEvent.Properties.Field` identifies which streamed field is receiving `Properties.Delta` chunks before the final `message.part.updated` event arrives.
 - `MessagePartUpdatedEvent.Properties.Part` can be `TextPart`, `ReasoningPart`, `FilePart`, `ToolPart`, `StepStartPart`, `StepFinishPart`, `SnapshotPart`, or `PatchPart`.
 - `SessionErrorEvent.Properties.Error` can be one of the public `AssistantMessageError` subtypes.
 
