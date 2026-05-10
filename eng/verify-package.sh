@@ -21,10 +21,11 @@ configuration="${1:-${CONFIGURATION:-Release}}"
 configuration_dir="$(printf '%s' "$configuration" | tr '[:upper:]' '[:lower:]')"
 package_dir="$repo_root/artifacts/package/$configuration_dir"
 verification_dir="$repo_root/artifacts/verification/package"
+package_id="Opencode.Sdk.CSharp"
 
 mkdir -p "$verification_dir"
 
-nupkg_path="$(find "$package_dir" -maxdepth 1 -type f -name 'Opencode.Sdk.*.nupkg' | sort | tail -n 1)"
+nupkg_path="$(find "$package_dir" -maxdepth 1 -type f -name "$package_id.*.nupkg" | sort | tail -n 1)"
 
 if [[ -z "$nupkg_path" ]]; then
     fail "No .nupkg was found under $package_dir."
@@ -33,7 +34,7 @@ fi
 package_contents="$(unzip -Z1 "$nupkg_path")"
 printf '%s\n' "$package_contents" > "$verification_dir/Opencode.Sdk.package.contents.txt"
 
-require_line "$package_contents" "Opencode.Sdk.nuspec"
+require_line "$package_contents" "$package_id.nuspec"
 require_line "$package_contents" "lib/net10.0/Opencode.Sdk.dll"
 require_line "$package_contents" "lib/net10.0/Opencode.Sdk.xml"
 require_line "$package_contents" "README.md"
@@ -43,10 +44,10 @@ if grep -Eq 'Opencode\.Sdk\.(Tests|Samples|MinimalSample)\.dll$' <<<"$package_co
     fail "The package contains a sample or test assembly."
 fi
 
-nuspec_contents="$(unzip -p "$nupkg_path" Opencode.Sdk.nuspec)"
+nuspec_contents="$(unzip -p "$nupkg_path" "$package_id.nuspec")"
 printf '%s\n' "$nuspec_contents" > "$verification_dir/Opencode.Sdk.nuspec"
 
-require_line "$nuspec_contents" "<id>Opencode.Sdk</id>"
+require_line "$nuspec_contents" "<id>$package_id</id>"
 require_line "$nuspec_contents" "<authors>DDB</authors>"
 require_line "$nuspec_contents" "<description>A community-maintained, unofficial C# SDK for the Opencode API</description>"
 require_line "$nuspec_contents" "<readme>README.md</readme>"

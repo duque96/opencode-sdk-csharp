@@ -22,10 +22,11 @@ configuration_dir="$(printf '%s' "$configuration" | tr '[:upper:]' '[:lower:]')"
 package_dir="$repo_root/artifacts/package/$configuration_dir"
 verification_dir="$repo_root/artifacts/verification/sourcelink"
 pdb_path="$repo_root/artifacts/bin/Opencode.Sdk/$configuration_dir/Opencode.Sdk.pdb"
+package_id="Opencode.Sdk.CSharp"
 
 mkdir -p "$verification_dir"
 
-snupkg_path="$(find "$package_dir" -maxdepth 1 -type f -name 'Opencode.Sdk.*.snupkg' | sort | tail -n 1)"
+snupkg_path="$(find "$package_dir" -maxdepth 1 -type f -name "$package_id.*.snupkg" | sort | tail -n 1)"
 
 if [[ -z "$snupkg_path" ]]; then
     fail "No .snupkg was found under $package_dir."

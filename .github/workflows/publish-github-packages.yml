@@ -76,7 +76,7 @@ jobs:
         if: ${{ github.event_name == 'workflow_dispatch' || steps.version_change.outputs.changed == 'true' }}
         shell: bash
         run: |
-          mapfile -t packages < <(find artifacts/package/release -maxdepth 1 -type f -name 'Opencode.Sdk.*.nupkg' ! -name '*.snupkg' | sort)
+          mapfile -t packages < <(find artifacts/package/release -maxdepth 1 -type f -name 'Opencode.Sdk.CSharp.*.nupkg' ! -name '*.snupkg' | sort)
 
           if [[ "${#packages[@]}" -eq 0 ]]; then
             echo "No packages found under artifacts/package/release." >&2
@@ -104,7 +104,7 @@ jobs:
         env:
           NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
         run: |
-          mapfile -t packages < <(find artifacts/package/release -maxdepth 1 -type f -name 'Opencode.Sdk.*.nupkg' ! -name '*.snupkg' | sort)
+          mapfile -t packages < <(find artifacts/package/release -maxdepth 1 -type f -name 'Opencode.Sdk.CSharp.*.nupkg' ! -name '*.snupkg' | sort)
 
           if [[ "${#packages[@]}" -eq 0 ]]; then
             echo "No packages found under artifacts/package/release." >&2
