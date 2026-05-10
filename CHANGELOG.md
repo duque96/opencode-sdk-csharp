@@ -8,7 +8,7 @@ The format is based on Keep a Changelog and the project follows Semantic Version
 
 ### Changed
 
-- rename published package to Opencode.Sdk.CSharp.
+- keep the published package name as Opencode.Sdk.
 
 ## [1.0.1] - 2026-05-10
 

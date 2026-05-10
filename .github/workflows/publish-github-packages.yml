@@ -65,7 +65,7 @@ jobs:
             exit 1
           fi
 
-          package_path="artifacts/package/release/Opencode.Sdk.CSharp.${version}.nupkg"
+          package_path="artifacts/package/release/Opencode.Sdk.${version}.nupkg"
 
           echo "version=${version}" >> "${GITHUB_OUTPUT}"
           echo "package_path=${package_path}" >> "${GITHUB_OUTPUT}"
