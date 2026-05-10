@@ -5,6 +5,7 @@
     <Platform Name="x86" />
   </Configurations>
   <Folder Name="/samples/">
+    <Project Path="samples/Opencode.Sdk.ConsoleChatSample/Opencode.Sdk.ConsoleChatSample.csproj" />
     <Project Path="samples/Opencode.Sdk.MinimalSample/Opencode.Sdk.MinimalSample.csproj" />
     <Project Path="samples/Opencode.Sdk.Samples/Opencode.Sdk.Samples.csproj" />
   </Folder>

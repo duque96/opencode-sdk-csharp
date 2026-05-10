@@ -165,6 +165,49 @@ public sealed class SessionClientTests
     }
 
     [Fact]
+    public async Task PromptAsyncBuildsExpectedRequestAndAcceptsNoContentResponse()
+    {
+        var handler = new CapturingHttpMessageHandler(static request => new HttpResponseMessage(HttpStatusCode.NoContent)
+        {
+            RequestMessage = request,
+        });
+
+        var client = CreateClient(handler);
+
+        var result = await client.Session.PromptAsync("session_123", new SessionChatRequest
+        {
+            ModelId = "gpt-5.4",
+            ProviderId = "openai",
+            Parts =
+            [
+                new TextPartInput
+                {
+                    Text = "Hola",
+                },
+            ],
+            Tools = new Dictionary<string, bool>
+            {
+                ["grep"] = true,
+            },
+        });
+
+        result.Should().BeTrue();
+
+        handler.Requests.Should().ContainSingle();
+        handler.Requests[0].Method.Should().Be(HttpMethod.Post);
+        handler.Requests[0].RequestUri.Should().Be(new Uri("http://localhost:54321/session/session_123/prompt_async", UriKind.Absolute));
+        handler.RequestBodies.Should().ContainSingle();
+        JsonNode.DeepEquals(
+            JsonNode.Parse(handler.RequestBodies[0]),
+            JsonNode.Parse("{" +
+                "\"modelID\":\"gpt-5.4\"," +
+                "\"parts\":[{\"type\":\"text\",\"text\":\"Hola\"}]," +
+                "\"providerID\":\"openai\"," +
+                "\"tools\":{\"grep\":true}}"))
+            .Should().BeTrue();
+    }
+
+    [Fact]
     public async Task MessagesAsyncBuildsExpectedRequestAndParsesPolymorphicParts()
     {
         var handler = new CapturingHttpMessageHandler(static request => new HttpResponseMessage(HttpStatusCode.OK)
@@ -550,6 +593,7 @@ public sealed class SessionClientTests
                 ("GET", "/session") => JsonResponse(_deleted ? "[]" : $"[{BuildSessionJson()}]"),
                 ("POST", "/session/session_123/init") => JsonResponse("true"),
                 ("POST", "/session/session_123/message") => await HandleChatAsync(request, cancellationToken),
+                ("POST", "/session/session_123/prompt_async") => await HandlePromptAsync(request, cancellationToken),
                 ("GET", "/session/session_123/message") => JsonResponse(BuildMessagesJson()),
                 ("POST", "/session/session_123/share") => HandleShare(),
                 ("POST", "/session/session_123/revert") => await HandleRevertAsync(request, cancellationToken),
@@ -620,6 +664,16 @@ public sealed class SessionClientTests
                     "{\"id\":\"part_finish_1\",\"messageID\":\"msg_assistant_1\",\"sessionID\":\"session_123\",\"type\":\"step-finish\",\"reason\":\"stop\",\"cost\":0.25,\"tokens\":{\"total\":10,\"cache\":{\"read\":1,\"write\":2},\"input\":3,\"output\":4,\"reasoning\":5}}" +
                 "]" +
                 "}");
+        }
+
+        private static async Task<HttpResponseMessage> HandlePromptAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            var body = request.Content is null ? string.Empty : await request.Content.ReadAsStringAsync(cancellationToken);
+            body.Should().Contain("\"modelID\":\"gpt-5.4\"");
+            body.Should().Contain("\"providerID\":\"openai\"");
+            body.Should().Contain("\"text\":\"Hola\"");
+
+            return new HttpResponseMessage(HttpStatusCode.NoContent);
         }
 
         private HttpResponseMessage HandleShare()

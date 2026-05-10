@@ -130,6 +130,8 @@ The supported session surface also includes delete, abort, revert, share, summar
 
 `EventClient.ListAsync` exposes server-sent events as `IAsyncEnumerable<EventStreamItem>` so callers can consume them with `await foreach` and standard cancellation tokens.
 
+The full catalog of currently supported event types lives in [docs/events.md](docs/events.md).
+
 ```csharp
 using Opencode.Client;
 using Opencode.Models.Events;

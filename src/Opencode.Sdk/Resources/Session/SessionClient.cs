@@ -122,6 +122,31 @@ public sealed class SessionClient
     }
 
     /// <summary>
+    /// Sends a new user message to a session without waiting for the assistant response.
+    /// </summary>
+    /// <param name="sessionId">The session identifier.</param>
+    /// <param name="request">The chat payload to submit.</param>
+    /// <param name="cancellationToken">The cancellation token to observe while waiting for the request to complete.</param>
+    /// <returns><see langword="true"/> when the prompt request was accepted.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="request"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentException">Thrown when required values are missing.</exception>
+    public async Task<bool> PromptAsync(string sessionId, SessionChatRequest request, CancellationToken cancellationToken = default)
+    {
+        ValidateSessionId(sessionId);
+        ValidateChatRequest(request);
+
+        await _client.Pipeline.SendAsync<object>(new HttpPipelineRequest
+        {
+            Method = HttpMethod.Post,
+            Path = $"/session/{sessionId}/prompt_async",
+            Body = request,
+            CancellationToken = cancellationToken,
+        });
+
+        return true;
+    }
+
+    /// <summary>
     /// Analyzes the app and initializes session-specific guidance.
     /// </summary>
     /// <param name="sessionId">The session identifier.</param>
