@@ -53,9 +53,35 @@ jobs:
         with:
           global-json-file: global.json
 
+      - name: Resolve package artifact
+        id: package_artifact
+        if: ${{ github.event_name == 'workflow_dispatch' || steps.version_change.outputs.changed == 'true' }}
+        shell: bash
+        run: |
+          version="$(grep -m1 '<Version>' Directory.Build.props | sed -E 's/.*<Version>([^<]+)<\/Version>.*/\1/')"
+
+          if [[ -z "${version}" ]]; then
+            echo "Unable to resolve package version from Directory.Build.props." >&2
+            exit 1
+          fi
+
+          package_path="artifacts/package/release/Opencode.Sdk.CSharp.${version}.nupkg"
+
+          echo "version=${version}" >> "${GITHUB_OUTPUT}"
+          echo "package_path=${package_path}" >> "${GITHUB_OUTPUT}"
+
       - name: Verify release readiness
         if: ${{ github.event_name == 'workflow_dispatch' || steps.version_change.outputs.changed == 'true' }}
         run: bash eng/verify-release.sh Release
+
+      - name: Ensure package artifact exists
+        if: ${{ github.event_name == 'workflow_dispatch' || steps.version_change.outputs.changed == 'true' }}
+        shell: bash
+        run: |
+          if [[ ! -f "${{ steps.package_artifact.outputs.package_path }}" ]]; then
+            echo "Expected package artifact at ${{ steps.package_artifact.outputs.package_path }}." >&2
+            exit 1
+          fi
 
       - name: Configure GitHub Packages source
         if: ${{ github.event_name == 'workflow_dispatch' || steps.version_change.outputs.changed == 'true' }}
@@ -76,14 +102,7 @@ jobs:
         if: ${{ github.event_name == 'workflow_dispatch' || steps.version_change.outputs.changed == 'true' }}
         shell: bash
         run: |
-          mapfile -t packages < <(find artifacts/package/release -maxdepth 1 -type f -name 'Opencode.Sdk.CSharp.*.nupkg' ! -name '*.snupkg' | sort)
-
-          if [[ "${#packages[@]}" -eq 0 ]]; then
-            echo "No packages found under artifacts/package/release." >&2
-            exit 1
-          fi
-
-          dotnet nuget push "${packages[@]}" \
+          dotnet nuget push "${{ steps.package_artifact.outputs.package_path }}" \
             --source github-packages \
             --skip-duplicate
 
@@ -104,14 +123,7 @@ jobs:
         env:
           NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
         run: |
-          mapfile -t packages < <(find artifacts/package/release -maxdepth 1 -type f -name 'Opencode.Sdk.CSharp.*.nupkg' ! -name '*.snupkg' | sort)
-
-          if [[ "${#packages[@]}" -eq 0 ]]; then
-            echo "No packages found under artifacts/package/release." >&2
-            exit 1
-          fi
-
-          dotnet nuget push "${packages[@]}" \
+          dotnet nuget push "${{ steps.package_artifact.outputs.package_path }}" \
             --api-key "${NUGET_API_KEY}" \
             --source https://api.nuget.org/v3/index.json \
             --skip-duplicate
