@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <PackageId>Opencode.Sdk</PackageId>
+    <PackageId>DDB.Opencode.Sdk</PackageId>
     <RootNamespace>Opencode</RootNamespace>
   </PropertyGroup>
 

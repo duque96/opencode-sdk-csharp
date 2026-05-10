@@ -7,7 +7,7 @@ This repository is maintained independently by DDB. It does not belong to Openco
 ## Installation
 
 ```bash
-dotnet add package Opencode.Sdk
+dotnet add package DDB.Opencode.Sdk
 ```
 
 If you need to consume the package from GitHub Packages instead of nuget.org, add the GitHub feed and authenticate with a GitHub personal access token with at least `read:packages` scope:
@@ -19,7 +19,7 @@ dotnet nuget add source "https://nuget.pkg.github.com/duque96/index.json" \
 	--password YOUR_GITHUB_PAT \
 	--store-password-in-clear-text
 
-dotnet add package Opencode.Sdk --source github-opencode
+dotnet add package DDB.Opencode.Sdk --source github-opencode
 ```
 
 ## Requirements
