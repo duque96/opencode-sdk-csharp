@@ -4,11 +4,18 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog and the project follows Semantic Versioning.
 
+## [1.0.3] - 2026-05-10
+
+### Changed
+
+- Update Rename Package across documentation.
+- Refresh documentation and samples to match documentation.
+
 ## [1.0.2] - 2026-05-10
 
 ### Changed
 
-- keep the published package name as Opencode.Sdk.
+- rename the published package to DDB.Opencode.Sdk.
 
 ## [1.0.1] - 2026-05-10
 
