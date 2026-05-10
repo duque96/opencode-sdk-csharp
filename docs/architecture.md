@@ -104,5 +104,6 @@ When adding a new resource or changing behavior, keep these ownership rules inta
 
 Related documents:
 
+- Event catalog: https://github.com/duque96/opencode-sdk-csharp/blob/main/docs/events.md
 - Sample index: https://github.com/duque96/opencode-sdk-csharp/blob/main/samples/README.md
 - Coverage guide: https://github.com/duque96/opencode-sdk-csharp/blob/main/docs/openapi-coverage.md

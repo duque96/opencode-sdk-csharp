@@ -8,6 +8,7 @@ using Opencode.Internal.Headers;
 using Opencode.Internal.Retry;
 using Opencode.Internal.Streaming;
 using Opencode.Internal.Urls;
+using Opencode.Models.Events;
 
 namespace Opencode.Internal.Http;
 
@@ -268,11 +269,45 @@ internal sealed class HttpPipeline
 
         await foreach (var message in SseMessageParser.ParseAsync(stream, linkedCancellation.Token))
         {
+            if (typeof(T) == typeof(EventStreamItem))
+            {
+                if (TryDeserializeEventStreamItem(message.Data, out var streamItem))
+                {
+                    yield return (T)(object)streamItem;
+                }
+
+                continue;
+            }
+
             var item = JsonSerializer.Deserialize<T>(message.Data, _options.SerializerProvider.Options)
                 ?? throw new JsonException("The streamed event payload deserialized to null.");
 
             yield return item;
         }
+    }
+
+    private bool TryDeserializeEventStreamItem(string payload, out EventStreamItem item)
+    {
+        using var document = JsonDocument.Parse(payload);
+        var root = document.RootElement;
+
+        if (!root.TryGetProperty("type", out var typeProperty) || typeProperty.ValueKind != JsonValueKind.String)
+        {
+            throw new JsonException("The streamed event payload did not contain a valid string 'type' discriminator.");
+        }
+
+        var eventType = typeProperty.GetString();
+
+        if (!EventStreamItem.IsKnownEventType(eventType))
+        {
+            item = null!;
+            return false;
+        }
+
+        item = JsonSerializer.Deserialize<EventStreamItem>(payload, _options.SerializerProvider.Options)
+            ?? throw new JsonException("The streamed event payload deserialized to null.");
+
+        return true;
     }
 
     private static HttpPipelineRequest CloneWithCancellation(HttpPipelineRequest request, CancellationToken cancellationToken)

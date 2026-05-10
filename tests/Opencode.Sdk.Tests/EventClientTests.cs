@@ -17,6 +17,9 @@ public sealed class EventClientTests
     {
         var payload = string.Join(
             "",
+            "event: message.part.delta\n",
+            "data: {\"type\":\"message.part.delta\",\"properties\":{\"sessionID\":\"session_123\",\"messageID\":\"msg_delta\",\"partID\":\"part_456\",\"field\":\"text\",\"delta\":\"hello\"}}\n",
+            "\n",
             "event: message.updated\n",
             "data: {\"type\":\"message.updated\",\"properties\":{\"info\":{\"id\":\"msg_1\",\"role\":\"user\",\"sessionID\":\"session_123\",\"time\":{\"created\":1}}}}\n",
             "\n",
@@ -32,15 +35,22 @@ public sealed class EventClientTests
         var client = CreateClient(handler);
         var items = await ReadAllAsync(client.Event.ListAsync());
 
-        items.Should().HaveCount(2);
-        items[0].Should().BeOfType<MessageUpdatedEvent>();
-        items[1].Should().BeOfType<SessionErrorEvent>();
-        ((MessageUpdatedEvent)items[0]).Properties.Info.Should().BeOfType<UserMessage>();
-        ((SessionErrorEvent)items[1]).Properties.Error.Should().BeOfType<UnknownError>();
+        items.Should().HaveCount(3);
+        items[0].Should().BeOfType<MessagePartDeltaEvent>();
+        items[1].Should().BeOfType<MessageUpdatedEvent>();
+        items[2].Should().BeOfType<SessionErrorEvent>();
+        ((MessagePartDeltaEvent)items[0]).Properties.SessionId.Should().Be("session_123");
+        ((MessagePartDeltaEvent)items[0]).Properties.MessageId.Should().Be("msg_delta");
+        ((MessagePartDeltaEvent)items[0]).Properties.PartId.Should().Be("part_456");
+        ((MessagePartDeltaEvent)items[0]).Properties.Field.Should().Be("text");
+        ((MessagePartDeltaEvent)items[0]).Properties.Delta.Should().Be("hello");
+        ((MessageUpdatedEvent)items[1]).Properties.Info.Should().BeOfType<UserMessage>();
+        ((SessionErrorEvent)items[2]).Properties.Error.Should().BeOfType<UnknownError>();
 
         handler.Requests.Should().ContainSingle();
         handler.Requests[0].Method.Should().Be(HttpMethod.Get);
         handler.Requests[0].RequestUri.Should().Be(new Uri("http://localhost:54321/event", UriKind.Absolute));
+        handler.Requests[0].Headers.Accept.Should().ContainSingle(header => header.MediaType == "text/event-stream");
     }
 
     [Fact]
@@ -111,6 +121,44 @@ public sealed class EventClientTests
         var action = async () => await ReadAllAsync(client.Event.ListAsync());
 
         await action.Should().ThrowAsync<JsonException>();
+    }
+
+    [Fact]
+    public async Task EventListAsyncSkipsUnknownEventsAndHandlesServerControlEvents()
+    {
+        var payload = string.Join(
+            "",
+            "event: connected\n",
+            "data: {\"type\":\"server.connected\",\"properties\":{}}\n",
+            "\n",
+            "event: heartbeat\n",
+            "data: {\"type\":\"server.heartbeat\",\"properties\":{}}\n",
+            "\n",
+            "event: session-status\n",
+            "data: {\"type\":\"session.status\",\"properties\":{\"sessionID\":\"session_123\",\"status\":{\"type\":\"busy\"}}}\n",
+            "\n",
+            "event: future\n",
+            "data: {\"type\":\"future.event\",\"properties\":{\"value\":1}}\n",
+            "\n",
+            "event: idle\n",
+            "data: {\"type\":\"session.idle\",\"properties\":{\"sessionID\":\"session_123\"}}\n",
+            "\n");
+
+        var handler = new CapturingHttpMessageHandler(_ => new HttpResponseMessage(HttpStatusCode.OK)
+        {
+            Content = CreateContent(payload),
+        });
+
+        var client = CreateClient(handler);
+        var items = await ReadAllAsync(client.Event.ListAsync());
+
+        items.Should().HaveCount(4);
+        items[0].Should().BeOfType<ServerConnectedEvent>();
+        items[1].Should().BeOfType<ServerHeartbeatEvent>();
+        items[2].Should().BeOfType<SessionStatusEvent>();
+        ((SessionStatusEvent)items[2]).Properties.SessionId.Should().Be("session_123");
+        ((SessionStatusEvent)items[2]).Properties.Status.Type.Should().Be("busy");
+        items[3].Should().BeOfType<SessionIdleEvent>();
     }
 
     [Fact]
@@ -196,7 +244,14 @@ public sealed class EventClientTests
 
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            Requests.Add(new HttpRequestMessage(request.Method, request.RequestUri));
+            var capturedRequest = new HttpRequestMessage(request.Method, request.RequestUri);
+
+            foreach (var header in request.Headers)
+            {
+                capturedRequest.Headers.TryAddWithoutValidation(header.Key, header.Value);
+            }
+
+            Requests.Add(capturedRequest);
             return Task.FromResult(_responseFactory(request));
         }
     }

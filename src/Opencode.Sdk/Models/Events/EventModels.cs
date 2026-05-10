@@ -8,15 +8,19 @@ namespace Opencode.Models.Events;
 /// Represents one item emitted by the server event stream.
 /// </summary>
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "type", UnknownDerivedTypeHandling = JsonUnknownDerivedTypeHandling.FailSerialization)]
+[JsonDerivedType(typeof(ServerConnectedEvent), "server.connected")]
+[JsonDerivedType(typeof(ServerHeartbeatEvent), "server.heartbeat")]
 [JsonDerivedType(typeof(InstallationUpdatedEvent), "installation.updated")]
 [JsonDerivedType(typeof(LspClientDiagnosticsEvent), "lsp.client.diagnostics")]
 [JsonDerivedType(typeof(MessageUpdatedEvent), "message.updated")]
 [JsonDerivedType(typeof(MessageRemovedEvent), "message.removed")]
+[JsonDerivedType(typeof(MessagePartDeltaEvent), "message.part.delta")]
 [JsonDerivedType(typeof(MessagePartUpdatedEvent), "message.part.updated")]
 [JsonDerivedType(typeof(MessagePartRemovedEvent), "message.part.removed")]
 [JsonDerivedType(typeof(StorageWriteEvent), "storage.write")]
 [JsonDerivedType(typeof(PermissionUpdatedEvent), "permission.updated")]
 [JsonDerivedType(typeof(FileEditedEvent), "file.edited")]
+[JsonDerivedType(typeof(SessionStatusEvent), "session.status")]
 [JsonDerivedType(typeof(SessionUpdatedEvent), "session.updated")]
 [JsonDerivedType(typeof(SessionDeletedEvent), "session.deleted")]
 [JsonDerivedType(typeof(SessionIdleEvent), "session.idle")]
@@ -25,11 +29,69 @@ namespace Opencode.Models.Events;
 [JsonDerivedType(typeof(IdeInstalledEvent), "ide.installed")]
 public abstract class EventStreamItem
 {
+    private static readonly HashSet<string> KnownEventTypes =
+    [
+        "server.connected",
+        "server.heartbeat",
+        "installation.updated",
+        "lsp.client.diagnostics",
+        "message.updated",
+        "message.removed",
+        "message.part.delta",
+        "message.part.updated",
+        "message.part.removed",
+        "storage.write",
+        "permission.updated",
+        "file.edited",
+        "session.status",
+        "session.updated",
+        "session.deleted",
+        "session.idle",
+        "session.error",
+        "file.watcher.updated",
+        "ide.installed",
+    ];
+
     /// <summary>
     /// Gets the upstream event discriminator.
     /// </summary>
     [JsonIgnore]
     public abstract string EventType { get; }
+
+    internal static bool IsKnownEventType(string? eventType)
+    {
+        return !string.IsNullOrWhiteSpace(eventType) && KnownEventTypes.Contains(eventType);
+    }
+}
+
+/// <summary>
+/// Describes the initial connection event emitted when the server accepts an SSE subscription.
+/// </summary>
+public sealed class ServerConnectedEvent : EventStreamItem
+{
+    /// <inheritdoc />
+    [JsonIgnore]
+    public override string EventType => "server.connected";
+
+    /// <summary>
+    /// Gets the payload emitted by the server for the connection event.
+    /// </summary>
+    public JsonElement? Properties { get; init; }
+}
+
+/// <summary>
+/// Describes the heartbeat event emitted periodically by the server while the SSE subscription stays open.
+/// </summary>
+public sealed class ServerHeartbeatEvent : EventStreamItem
+{
+    /// <inheritdoc />
+    [JsonIgnore]
+    public override string EventType => "server.heartbeat";
+
+    /// <summary>
+    /// Gets the payload emitted by the server for the heartbeat event.
+    /// </summary>
+    public JsonElement? Properties { get; init; }
 }
 
 /// <summary>
@@ -147,6 +209,55 @@ public sealed class MessageRemovedEventProperties
     /// </summary>
     [JsonPropertyName("sessionID")]
     public required string SessionId { get; init; }
+}
+
+/// <summary>
+/// Describes a delta emitted for one message part while the server is still streaming it.
+/// </summary>
+public sealed class MessagePartDeltaEvent : EventStreamItem
+{
+    /// <inheritdoc />
+    [JsonIgnore]
+    public override string EventType => "message.part.delta";
+
+    /// <summary>
+    /// Gets the incremental part payload.
+    /// </summary>
+    public required MessagePartDeltaEventProperties Properties { get; init; }
+}
+
+/// <summary>
+/// Describes the payload for a message part delta event.
+/// </summary>
+public sealed class MessagePartDeltaEventProperties
+{
+    /// <summary>
+    /// Gets the session identifier that owns the streamed message part.
+    /// </summary>
+    [JsonPropertyName("sessionID")]
+    public required string SessionId { get; init; }
+
+    /// <summary>
+    /// Gets the owning message identifier.
+    /// </summary>
+    [JsonPropertyName("messageID")]
+    public required string MessageId { get; init; }
+
+    /// <summary>
+    /// Gets the streamed message part identifier.
+    /// </summary>
+    [JsonPropertyName("partID")]
+    public required string PartId { get; init; }
+
+    /// <summary>
+    /// Gets the field receiving the incremental update.
+    /// </summary>
+    public required string Field { get; init; }
+
+    /// <summary>
+    /// Gets the emitted delta content.
+    /// </summary>
+    public required string Delta { get; init; }
 }
 
 /// <summary>
@@ -321,6 +432,49 @@ public sealed class FileEditedEventProperties
     /// Gets the edited file path.
     /// </summary>
     public required string File { get; init; }
+}
+
+/// <summary>
+/// Describes a session status transition notification.
+/// </summary>
+public sealed class SessionStatusEvent : EventStreamItem
+{
+    /// <inheritdoc />
+    [JsonIgnore]
+    public override string EventType => "session.status";
+
+    /// <summary>
+    /// Gets the session status payload.
+    /// </summary>
+    public required SessionStatusEventProperties Properties { get; init; }
+}
+
+/// <summary>
+/// Describes the payload for a session status event.
+/// </summary>
+public sealed class SessionStatusEventProperties
+{
+    /// <summary>
+    /// Gets the session identifier associated with the status update.
+    /// </summary>
+    [JsonPropertyName("sessionID")]
+    public required string SessionId { get; init; }
+
+    /// <summary>
+    /// Gets the status object emitted by the server.
+    /// </summary>
+    public required SessionStatusInfo Status { get; init; }
+}
+
+/// <summary>
+/// Describes one session status value emitted by the server.
+/// </summary>
+public sealed class SessionStatusInfo
+{
+    /// <summary>
+    /// Gets the status discriminator.
+    /// </summary>
+    public required string Type { get; init; }
 }
 
 /// <summary>

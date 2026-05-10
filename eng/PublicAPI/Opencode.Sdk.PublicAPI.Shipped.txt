@@ -251,6 +251,17 @@ type sealed class Opencode.Models.Events.LspClientDiagnosticsEventProperties
   ctor LspClientDiagnosticsEventProperties()
   property string Path { get; init; }
   property string ServerId { get; init; }
+type sealed class Opencode.Models.Events.MessagePartDeltaEvent
+  ctor MessagePartDeltaEvent()
+  property string EventType { get; }
+  property Opencode.Models.Events.MessagePartDeltaEventProperties Properties { get; init; }
+type sealed class Opencode.Models.Events.MessagePartDeltaEventProperties
+  ctor MessagePartDeltaEventProperties()
+  property string Delta { get; init; }
+  property string Field { get; init; }
+  property string MessageId { get; init; }
+  property string PartId { get; init; }
+  property string SessionId { get; init; }
 type sealed class Opencode.Models.Events.MessagePartRemovedEvent
   ctor MessagePartRemovedEvent()
   property string EventType { get; }
@@ -295,6 +306,14 @@ type sealed class Opencode.Models.Events.PermissionUpdatedEventProperties
 type sealed class Opencode.Models.Events.PermissionUpdatedEventTimeInfo
   ctor PermissionUpdatedEventTimeInfo()
   property long Created { get; init; }
+type sealed class Opencode.Models.Events.ServerConnectedEvent
+  ctor ServerConnectedEvent()
+  property string EventType { get; }
+  property System.Text.Json.JsonElement? Properties { get; init; }
+type sealed class Opencode.Models.Events.ServerHeartbeatEvent
+  ctor ServerHeartbeatEvent()
+  property string EventType { get; }
+  property System.Text.Json.JsonElement? Properties { get; init; }
 type sealed class Opencode.Models.Events.SessionDeletedEvent
   ctor SessionDeletedEvent()
   property string EventType { get; }
@@ -317,6 +336,17 @@ type sealed class Opencode.Models.Events.SessionIdleEvent
 type sealed class Opencode.Models.Events.SessionIdleEventProperties
   ctor SessionIdleEventProperties()
   property string SessionId { get; init; }
+type sealed class Opencode.Models.Events.SessionStatusEvent
+  ctor SessionStatusEvent()
+  property string EventType { get; }
+  property Opencode.Models.Events.SessionStatusEventProperties Properties { get; init; }
+type sealed class Opencode.Models.Events.SessionStatusEventProperties
+  ctor SessionStatusEventProperties()
+  property string SessionId { get; init; }
+  property Opencode.Models.Events.SessionStatusInfo Status { get; init; }
+type sealed class Opencode.Models.Events.SessionStatusInfo
+  ctor SessionStatusInfo()
+  property string Type { get; init; }
 type sealed class Opencode.Models.Events.SessionUpdatedEvent
   ctor SessionUpdatedEvent()
   property string EventType { get; }
@@ -651,6 +681,7 @@ type sealed class Opencode.Resources.Session.SessionClient
   method System.Threading.Tasks.Task<bool> AbortAsync(string sessionId, System.Threading.CancellationToken cancellationToken)
   method System.Threading.Tasks.Task<bool> DeleteAsync(string sessionId, System.Threading.CancellationToken cancellationToken)
   method System.Threading.Tasks.Task<bool> InitAsync(string sessionId, Opencode.Models.Session.SessionInitRequest request, System.Threading.CancellationToken cancellationToken)
+  method System.Threading.Tasks.Task<bool> PromptAsync(string sessionId, Opencode.Models.Session.SessionChatRequest request, System.Threading.CancellationToken cancellationToken)
   method System.Threading.Tasks.Task<bool> SummarizeAsync(string sessionId, Opencode.Models.Session.SessionSummarizeRequest request, System.Threading.CancellationToken cancellationToken)
 type sealed class Opencode.Resources.Tui.TuiClient
   method System.Threading.Tasks.Task<bool> AppendPromptAsync(string text, System.Threading.CancellationToken cancellationToken)

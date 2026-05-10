@@ -32,6 +32,10 @@ public sealed class EventClient
         {
             Method = HttpMethod.Get,
             Path = "/event",
+            Headers = new Dictionary<string, string?>
+            {
+                ["Accept"] = "text/event-stream",
+            },
             CancellationToken = cancellationToken,
         });
     }
