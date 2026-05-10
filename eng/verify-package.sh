@@ -21,13 +21,18 @@ configuration="${1:-${CONFIGURATION:-Release}}"
 configuration_dir="$(printf '%s' "$configuration" | tr '[:upper:]' '[:lower:]')"
 package_dir="$repo_root/artifacts/package/$configuration_dir"
 verification_dir="$repo_root/artifacts/verification/package"
-package_id="Opencode.Sdk.CSharp"
+package_id="Opencode.Sdk"
+package_version="$(grep -m1 '<Version>' "$repo_root/Directory.Build.props" | sed -E 's/.*<Version>([^<]+)<\/Version>.*/\1/')"
 
 mkdir -p "$verification_dir"
 
-nupkg_path="$(find "$package_dir" -maxdepth 1 -type f -name "$package_id.*.nupkg" | sort | tail -n 1)"
+nupkg_path="$package_dir/$package_id.$package_version.nupkg"
 
-if [[ -z "$nupkg_path" ]]; then
+if [[ -z "$package_version" ]]; then
+    fail "Unable to resolve package version from Directory.Build.props."
+fi
+
+if [[ ! -f "$nupkg_path" ]]; then
     fail "No .nupkg was found under $package_dir."
 fi
 
