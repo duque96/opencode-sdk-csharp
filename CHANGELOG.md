@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog and the project follows Semantic Versioning.
 
+## [1.0.2] - 2026-05-10
+
+### Changed
+
+- rename published package to Opencode.Sdk.CSharp.
+
 ## [1.0.1] - 2026-05-10
 
 ### Changed
